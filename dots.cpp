@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
+#include "BigPoint.h"
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 300;
@@ -25,7 +26,7 @@ bool init()
 	Window = SDL_CreateWindow("lines", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (!Window)
 	{
-		printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 		return false;
 	}
 
@@ -33,7 +34,7 @@ bool init()
 	Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED );
 	if (!Renderer)
 	{
-		printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
+		printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
 		return false;
 	}
 
@@ -50,58 +51,20 @@ void close()
 	SDL_Quit();
 }
 
-class BigPoint
-{
-public:
-	static const int size = 11;
-	
-	BigPoint()
-	{
-		int c = 10;
-		points[0]={c,c};
-		for (int i = -1; i <= 1; i++)
-		{	
-			points[i+2] = {c+i,c-1};
-			points[i+5] = {c+i,c+1};
-		}
-		for (int i = 1; i<=2; i++)
-		{
-			points[6+i] = {c+i,c};
-			points[8+i] = {c-i,c};
-		}
-	}
-
-	void move(int dirX, int dirY)
-	{
-		for (int i = 0; i<size; i++)
-		{
-			points[i].x += dirX;
-			points[i].y += dirY;
-		}
-	}
-
-	SDL_Point* getPoints()
-	{
-		return points;
-	}
-
-	SDL_Point getCenter()
-	{
-		return points[0];
-	}
-private:
-	SDL_Point points[BigPoint::size];
-};
-
-
 int main( int argc, char* args[] )
 {
 	//Start up SDL and create window
 	if (init())
 	{	
 	    int wait = 10;
-		BigPoint bigPoint;
+
+		int startX = 150;
+		int startY = 190;
+		BigPoint bigPoint(startX, startY);
 		Uint32 timeout = SDL_GetTicks() + wait;
+
+		int dirX = 0;
+		int dirY = 1;
 
         SDL_Event event; 
         bool quit = false;
@@ -117,11 +80,13 @@ int main( int argc, char* args[] )
 			SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0xAF, SDL_ALPHA_OPAQUE);
 			SDL_RenderDrawPoints(Renderer, bigPoint.getPoints(), BigPoint::size);
 			
-			if (SDL_GetTicks() > timeout) {
+			if (SDL_GetTicks() > timeout) 
+			{
 				timeout = SDL_GetTicks() + wait;
-				bigPoint.move(1,1);
-				if (bigPoint.getCenter().y > SCREEN_HEIGHT - 4)
-					bigPoint.move(-SCREEN_HEIGHT+10,-SCREEN_HEIGHT+10);
+				bigPoint.move(dirX, dirY);
+				if (bigPoint.getCenter().y > SCREEN_HEIGHT - 2 ||
+					bigPoint.getCenter().y < startY)
+					dirY = -dirY;
 			}
 			//Update screen
 			SDL_RenderPresent(Renderer);
