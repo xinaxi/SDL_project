@@ -52,6 +52,15 @@ public:
 		
 	}
 
+	bool touchingRect(SDL_Rect r) {
+		if (getCenter().x > r.x - 3 &&
+			getCenter().x < r.x + r.w + 3 &&
+			getCenter().y > r.y - 2 &&
+			getCenter().y < r.y + r.h + 2)
+			return true;
+		return false;
+	}
+
 	// Array of point to draw 
 	SDL_Point* getPoints() {
 		return points;
